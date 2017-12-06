@@ -1,0 +1,5 @@
+package fav
+
+func init() {
+
+}
