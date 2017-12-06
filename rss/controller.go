@@ -109,7 +109,7 @@ func fetchAndSend(m *RssMgr) error {
 		}
 		msg += fmt.Sprintf("%s: <a href=\"%s\">%s</a>\n", item.PublishedParsed.Format("2006/01/02"), item.Link, html.EscapeString(item.Title))
 	}
-	msg = fmt.Sprintf("\n---\n%s: <a href=\"%s\">@%s</a>", "rss", m.Rss.Link, html.EscapeString(m.Rss.Title))
+	msg += fmt.Sprintf("\n---\n%s: <a href=\"%s\">@%s</a>", "rss", m.Rss.Link, html.EscapeString(m.Rss.Title))
 
 	for _, userID := range userIDs {
 		_, err = app.Bot.Send(&telebot.User{
