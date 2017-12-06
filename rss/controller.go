@@ -111,7 +111,7 @@ func fetchAndSend(m *RssMgr) error {
 	}
 	msg = fmt.Sprintf("\n---\n%s: <a href=\"%s\">@%s</a>", "rss", m.Rss.Link, html.EscapeString(m.Rss.Title))
 
-	for userID := range userIDs {
+	for _, userID := range userIDs {
 		_, err = app.Bot.Send(&telebot.User{
 			ID: userID,
 		}, msg, &telebot.SendOptions{
