@@ -97,17 +97,17 @@ func fetchAndSend(m *RssMgr) error {
 		return nil
 	}
 
-	if (feed.Items[0].PublishedParsed.Unix() == m.Rss.LastItemPublishTime && feed.Items[0].Link == m.Rss.LastItemLink && feed.Items[0].Title == m.Rss.LastItemTitle) || feed.Items[0].PublishedParsed.Unix() < m.Rss.LastItemPublishTime {
-		log.Println("Info: fetch old RSS", m.Rss.URL, feed.Items[0].Title, feed.Items[0].Link, feed.Items[0].PublishedParsed.Format("2006/01/02 15:04:05"))
+	if (getFeedItemUpdateTime(feed.Items[0]).Unix() == m.Rss.LastItemPublishTime && feed.Items[0].Link == m.Rss.LastItemLink && feed.Items[0].Title == m.Rss.LastItemTitle) || getFeedItemUpdateTime(feed.Items[0]).Unix() < m.Rss.LastItemPublishTime {
+		log.Println("Info: fetch old RSS", m.Rss.URL, feed.Items[0].Title, feed.Items[0].Link, getFeedItemUpdateTime(feed.Items[0]).Format("2006/01/02 15:04:05"))
 		return nil
 	}
 
 	msg := ""
 	for _, item := range feed.Items {
-		if (item.PublishedParsed.Unix() == m.Rss.LastItemPublishTime && item.Link == m.Rss.LastItemLink && item.Title == m.Rss.LastItemTitle) || item.PublishedParsed.Unix() < m.Rss.LastItemPublishTime {
+		if (getFeedItemUpdateTime(item).Unix() == m.Rss.LastItemPublishTime && item.Link == m.Rss.LastItemLink && item.Title == m.Rss.LastItemTitle) || getFeedItemUpdateTime(item).Unix() < m.Rss.LastItemPublishTime {
 			break
 		}
-		msg += fmt.Sprintf("%s: <a href=\"%s\">%s</a>\n", item.PublishedParsed.Format("2006/01/02"), item.Link, html.EscapeString(item.Title))
+		msg += fmt.Sprintf("%s: <a href=\"%s\">%s</a> \n", getFeedItemUpdateTime(item).Format("2006/01/02"), item.Link, html.EscapeString(item.Title))
 	}
 	msg += fmt.Sprintf("\n---\n%s: <a href=\"%s\">@%s</a>", "rss", m.Rss.Link, html.EscapeString(m.Rss.Title))
 
@@ -125,7 +125,7 @@ func fetchAndSend(m *RssMgr) error {
 
 	m.Rss.LastItemTitle = feed.Items[0].Title
 	m.Rss.LastItemLink = feed.Items[0].Link
-	m.Rss.LastItemPublishTime = feed.Items[0].PublishedParsed.Unix()
+	m.Rss.LastItemPublishTime = getFeedItemUpdateTime(feed.Items[0]).Unix()
 
 	err = UpdateRssResource(m.Rss.ID, map[string]interface{}{
 		"last_item_title":        m.Rss.LastItemTitle,

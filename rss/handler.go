@@ -86,7 +86,12 @@ func Add(m *telebot.Message) {
 	if len(feed.Items) > 0 {
 		r.LastItemTitle = feed.Items[0].Title
 		r.LastItemLink = feed.Items[0].Link
-		r.LastItemPublishTime = feed.Items[0].PublishedParsed.Unix()
+		updateTime := getFeedItemUpdateTime(feed.Items[0])
+		if updateTime == nil {
+			msg = "rss url is invalid."
+			return
+		}
+		r.LastItemPublishTime = updateTime.Unix()
 	}
 
 	rssID, err := AddRssResource(&r)
