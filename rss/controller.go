@@ -7,6 +7,8 @@ import (
 	"sync"
 	"tgbot/app"
 
+	"net/url"
+
 	"github.com/jasonlvhit/gocron"
 	"github.com/mmcdole/gofeed"
 	"github.com/tucnak/telebot"
@@ -124,7 +126,23 @@ func fetchAndSend(m *RssMgr) error {
 	}
 
 	m.Rss.LastItemTitle = feed.Items[0].Title
-	m.Rss.LastItemLink = feed.Items[0].Link
+	//TODO: xml:base
+	itemURL, err := url.Parse(feed.Items[0].Link)
+	if err != nil {
+		log.Println("Error: item url is invalid,", err)
+		m.Rss.LastItemLink = feed.Items[0].Link
+	} else {
+		if itemURL.Scheme == "" {
+			feedURL, err := url.Parse(m.Rss.URL)
+			if err != nil {
+				m.Rss.LastItemLink = feed.Items[0].Link
+			} else {
+				m.Rss.LastItemLink = feedURL.ResolveReference(itemURL).String()
+			}
+		} else {
+			m.Rss.LastItemLink = feed.Items[0].Link
+		}
+	}
 	m.Rss.LastItemPublishTime = getFeedItemUpdateTime(feed.Items[0]).Unix()
 
 	err = UpdateRssResource(m.Rss.ID, map[string]interface{}{

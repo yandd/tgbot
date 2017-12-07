@@ -62,7 +62,7 @@ func Add(m *telebot.Message) {
 		})
 	}()
 
-	_, err := url.Parse(m.Payload)
+	feedURL, err := url.Parse(m.Payload)
 	if err != nil {
 		log.Println("Error: url is invalid,", m.Payload, m.Sender, err)
 		msg = "rss url is invalid."
@@ -85,7 +85,18 @@ func Add(m *telebot.Message) {
 
 	if len(feed.Items) > 0 {
 		r.LastItemTitle = feed.Items[0].Title
-		r.LastItemLink = feed.Items[0].Link
+		//TODO: xml:base
+		itemURL, err := url.Parse(feed.Items[0].Link)
+		if err != nil {
+			log.Println("Error: item url is invalid,", err)
+			r.LastItemLink = feed.Items[0].Link
+		} else {
+			if itemURL.Scheme == "" {
+				r.LastItemLink = feedURL.ResolveReference(itemURL).String()
+			} else {
+				r.LastItemLink = feed.Items[0].Link
+			}
+		}
 		updateTime := getFeedItemUpdateTime(feed.Items[0])
 		if updateTime == nil {
 			msg = "rss url is invalid."
